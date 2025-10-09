@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetroFearQA - Тестирование хоррор-игр в стиле PS1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'VT323', monospace;
+            background: linear-gradient(135deg, #0A0A0A 0%, #1B2A1F 100%);
+            color: #FFF;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+        .pixel-font { font-family: 'Press Start 2P', cursive; font-size: 20px; text-shadow: 2px 2px 4px rgba(139, 0, 0, 0.7); }
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.9);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            border-bottom: 2px solid #8B0000;
+            backdrop-filter: blur(5px);
+        }
+        nav { display: flex; gap: 25px; }
+        nav a {
+            color: #E0E0E0;
+            text-decoration: none;
+            font-size: 18px;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+        nav a:hover {
+            color: #FF4040;
+            text-shadow: 0 0 10px #FF4040;
+        }
+        .cta-button {
+            background: linear-gradient(45deg, #8B0000, #A52A2A);
+            color: #FFF;
+            padding: 12px 25px;
+            border: 2px solid #FF4040;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-right: 30px;
+            box-shadow: 0 4px 8px rgba(139, 0, 0, 0.4);
+        }
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(139, 0, 0, 0.6);
+        }
+        .green-btn { background: linear-gradient(45deg, #1B2A1F, #2D4A2D); border-color: #4CAF50; }
+        .green-btn:hover { box-shadow: 0 6px 12px rgba(76, 175, 80, 0.6); }
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="noise" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" fill="none"/><circle cx="50" cy="50" r="1" fill="%23fff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23noise)"/></svg>') repeat;
+            opacity: 0.15;
+            animation: noise 0.3s infinite linear;
+        }
+        @keyframes noise { 0% { transform: translate(0, 0); } 10% { transform: translate(-2px, 2px); } 20% { transform: translate(2px, -2px); } }
+        .hero img {
+            width: 85%;
+            max-width: 900px;
+            height: auto;
+            margin-bottom: 30px;
+            filter: sepia(0.3) contrast(1.2) brightness(0.9);
+            animation: fadeInUp 1s ease-out;
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .hero h1 { font-size: 40px; margin: 0 0 15px; color: #FF4040; }
+        .hero p { font-size: 22px; max-width: 700px; margin-bottom: 30px; }
+        .services {
+            background: #1B2A1F;
+            padding: 80px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .service-card {
+            background: rgba(10, 10, 10, 0.8);
+            padding: 25px;
+            text-align: center;
+            border: 3px solid #8B0000;
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(139, 0, 0, 0.5);
+        }
+        .service-icon { width: 60px; height: 60px; margin: 0 auto 15px; }
+        .carousel {
+            background: #0A0A0A;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+        }
+        .carousel-container { max-width: 700px; margin: 0 auto; overflow: hidden; }
+        .carousel-item {
+            display: none;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .carousel-item.active { display: block; opacity: 1; }
+        .carousel-item img { width: 100%; height: 250px; object-fit: cover; border: 2px solid #8B0000; }
+        .carousel-btn {
+            background: #8B0000;
+            color: #FFF;
+            border: none;
+            padding: 12px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .carousel-btn:hover { background: #A52A2A; transform: scale(1.1); }
+        .carousel-dots { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
+        .dot { width: 12px; height: 12px; background: #666; border-radius: 50%; cursor: pointer; transition: background 0.3s ease; }
+        .dot.active { background: #FF4040; }
+        .cases {
+            background: #1B2A1F;
+            padding: 60px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+        .case-card {
+            background: rgba(10, 10, 10, 0.8);
+            padding: 25px;
+            text-align: center;
+            border: 2px solid #1B2A1F;
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .case-card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(27, 42, 31, 0.5); }
+        .case-img img { width: 100%; height: 220px; object-fit: cover; border-radius: 5px; }
+        footer {
+            background: #0A0A0A;
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 2px solid #8B0000;
+        }
+        .contact-form {
+            max-width: 450px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .contact-form input, .contact-form textarea {
+            padding: 12px;
+            background: #1B2A1F;
+            border: 2px solid #8B0000;
+            border-radius: 5px;
+            color: #FFF;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        .contact-form input:focus, .contact-form textarea:focus { border-color: #FF4040; outline: none; }
+        .contact-form button {
+            background: linear-gradient(45deg, #8B0000, #A52A2A);
+            color: #FFF;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .contact-form button:hover { transform: scale(1.05); box-shadow: 0 4px 8px rgba(139, 0, 0, 0.6); }
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 15px; padding: 15px; }
+            nav { flex-wrap: wrap; justify-content: center; }
+            .cta-button { margin-right: 0; margin-bottom: 10px; }
+            .hero img { width: 100%; }
+            .services, .cases { grid-template-columns: 1fr; padding: 40px 10px; }
+            .hero h1 { font-size: 30px; }
+            .hero p { font-size: 18px; }
+        }
+        svg#filters { position: absolute; width: 0; height: 0; }
+        .crt { filter: url(#crt-filter); }
+    </style>
+</head>
+<body>
+    <svg id="filters" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="crt-filter" x="0" y="0">
+                <feColorMatrix type="matrix" values="0.3 0.6 0.0 0 0  0.0 0.0 0.0 0 0  0.0 0.0 0.0 0 0  0 0 0 1 0" result="cm"/>
+                <feGaussianBlur stdDeviation="0.5" result="blur"/>
+                <feComponentTransfer>
+                    <feFuncR type="discrete" tableValues="0.9 0.9"/>
+                    <feFuncG type="discrete" tableValues="0.8 0.8"/>
+                    <feFuncB type="discrete" tableValues="0.7 0.7"/>
+                </feComponentTransfer>
+                <feComposite operator="in" in2="SourceGraphic" in="blur" result="comp"/>
+                <feBlend mode="screen" in2="SourceGraphic" in="comp"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <header>
+        <h1 class="pixel-font">RetroFearQA</h1>
+        <nav>
+            <a href="#services" aria-label="Услуги">Услуги</a>
+            <a href="#cases" aria-label="Кейсы">Кейсы</a>
+            <a href="#contacts" aria-label="Контакты">Контакты</a>
+        </nav>
+        <button class="cta-button" onclick="scrollToContacts()">Тестировать игру</button>
+    </header>
+
+    <section class="hero crt">
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjkyOTI5Ii8+PHRleHQgeD0iNDUwIiB5PSIyMjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlR1bWFubnkgS29ycmlkb3IgUFNxPC90ZXh0Pjwvc3ZnPg==" alt="Туманный коридор в стиле PS1" loading="lazy">
+        <h1 class="pixel-font">ВАШ ХОРРОР БЕЗ БАГОВ</h1>
+        <p>Тестируем ретро-игры в стиле PS1. Жутко качественно.</p>
+        <div>
+            <button class="cta-button">Рассчитать стоимость</button>
+            <button class="cta-button green-btn">Связаться</button>
+        </div>
+    </section>
+
+    <section id="services" class="services">
+        <h2 class="pixel-font">Услуги</h2>
+        <div class="service-card">
+            <div class="service-icon"><svg viewBox="0 0 50 50"><rect x="10" y="10" width="30" height="30" fill="#8B0000"/><text x="25" y="30" text-anchor="middle" fill="white" font-size="12">💀</text></svg></div>
+            <h3>Входной контроль</h3>
+            <p>Проверка активов (текстуры, код)</p>
+        </div>
+        <div class="service-card">
+            <div class="service-icon"><svg viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="#8B0000"/><text x="25" y="30" text-anchor="middle" fill="white" font-size="12">👁️</text></svg></div>
+            <h3>Промежуточный контроль</h3>
+            <p>Тестирование альфа-версий</p>
+        </div>
+        <div class="service-card">
+            <div class="service-icon"><svg viewBox="0 0 50 50"><rect x="10" y="10" width="30" height="30" rx="5" fill="#8B0000"/><text x="25" y="30" text-anchor="middle" fill="white" font-size="12">💾</text></svg></div>
+            <h3>Финальный контроль</h3>
+            <p>Атмосфера, FPS</p>
+        </div>
+        <div class="service-card">
+            <div class="service-icon"><svg viewBox="0 0 50 50"><rect x="10" y="10" width="30" height="30" fill="#8B0000"/><text x="25" y="30" text-anchor="middle" fill="white" font-size="12">📖</text></svg></div>
+            <h3>Ретроспективный анализ</h3>
+            <p>Отзывы игроков</p>
+        </div>
+    </section>
+
+    <section class="carousel">
+        <h2 class="pixel-font">Методы</h2>
+        <div class="carousel-container">
+            <div class="carousel-item active">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjkyOTI5Ii8+PHRleHQgeD0iMzUwIiB5PSIxMjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxhYiBUZXN0czwvdGV4dD48L3N2Zz4=" alt="Лабораторные тесты" loading="lazy">
+                <p>Лабораторные тесты (FPS, производительность)</p>
+            </div>
+            <div class="carousel-item">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjkyOTI5Ii8+PHRleHQgeD0iMzUwIiB5PSIxMjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlZpc3VhbCBDb250cm9sPC90ZXh0Pjwvc3ZnPg==" alt="Визуальный контроль" loading="lazy">
+                <p>Визуальный контроль (UI, текстуры)</p>
+            </div>
+            <div class="carousel-item">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjkyOTI5Ii8+PHRleHQgeD0iMzUwIiB5PSIxMjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkF1dG9tYXRpb24gVGVzdHM8L3RleHQ+PC9zdmc+" alt="Автоматизация" loading="lazy">
+                <p>Автоматизация (скрипты на баги)</p>
+            </div>
+        </div>
+        <button class="carousel-btn" onclick="prevSlide()">←</button>
+        <button class="carousel-btn" onclick="nextSlide()">→</button>
+        <div class="carousel-dots">
+            <span class="dot active" onclick="goToSlide(0)"></span>
+            <span class="dot" onclick="goToSlide(1)"></span>
+            <span class="dot" onclick="goToSlide(2)"></span>
+        </div>
+    </section>
+
+    <section id="cases" class="cases">
+        <h2 class="pixel-font">Кейсы</h2>
+        <div class="case-card">
+            <h3>Хоррор 1: "Тени PS1"</h3>
+            <p>-95% багов AI</p>
+            <div class="case-img"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjkyOTI5Ii8+PHRleHQgeD0iMTYwIiB5PSIxMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPlRlbmlQUzE8L3RleHQ+PC9zdmc+" alt="Скриншот Хоррор 1" loading="lazy"></div>
+        </div>
+        <div class="case-card">
+            <h3>Хоррор 2: "Эхо Кошмаров"</h3>
+            <p>+90% FPS</p>
+            <div class="case-img"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjkyOTI5Ii8+PHRleHQgeD0iMTYwIiB5PSIxMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkVjaG8gS29zaG1hcm92PC90ZXh0Pjwvc3ZnPg==" alt="Скриншот Хоррор 2" loading="lazy"></div>
+        </div>
+        <div class="case-card">
+            <h3>Хоррор 3: "Бездна Отзывов"</h3>
+            <p>4.8/5 itch.io</p>
+            <div class="case-img"><img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMjkyOTI5Ii8+PHRleHQgeD0iMTYwIiB5PSIxMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkJlemRuYSBPdHl6dm92PC90ZXh0Pjwvc3ZnPg==" alt="Скриншот Хоррор 3" loading="lazy"></div>
+        </div>
+    </section>
+
+    <footer id="contacts">
+        <p>info@retrofearqa.ru | Discord: @RetroFearQA | © 2025 RetroFearQA</p>
+        <form class="contact-form" onsubmit="handleSubmit(event)">
+            <input type="email" placeholder="Ваш email" required aria-label="Email">
+            <textarea placeholder="Сообщение" rows="4" required aria-label="Сообщение"></textarea>
+            <button type="submit">Отправить</button>
+        </form>
+    </footer>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-item');
+        const dots = document.querySelectorAll('.dot');
+        let interval;
+
+        function updateCarousel() {
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === currentSlide));
+            dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+        }
+
+        function nextSlide() { currentSlide = (currentSlide + 1) % slides.length; updateCarousel(); }
+        function prevSlide() { currentSlide = (currentSlide - 1 + slides.length) % slides.length; updateCarousel(); }
+        function goToSlide(n) { currentSlide = n; updateCarousel(); }
+
+        interval = setInterval(nextSlide, 5000);
+        document.querySelector('.carousel').addEventListener('mouseenter', () => clearInterval(interval));
+        document.querySelector('.carousel').addEventListener('mouseleave', () => interval = setInterval(nextSlide, 5000));
+
+        let startX = 0;
+        document.querySelector('.carousel-container').addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        document.querySelector('.carousel-container').addEventListener('touchend', e => {
+            let endX = e.changedTouches[0].clientX;
+            if (startX - endX > 50) nextSlide();
+            if (endX - startX > 50) prevSlide();
+        });
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            alert('Спасибо! Ваше сообщение отправлено. (Симуляция)');
+            event.target.reset();
+        }
+
+        function scrollToContacts() { document.getElementById('contacts').scrollIntoView({ behavior: 'smooth' }); }
+
+        updateCarousel();
+    </script>
+</body>
+</html>
